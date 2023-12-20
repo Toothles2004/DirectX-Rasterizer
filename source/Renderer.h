@@ -2,6 +2,7 @@
 
 struct SDL_Window;
 struct SDL_Surface;
+class Mesh;
 
 namespace dae
 {
@@ -29,6 +30,14 @@ namespace dae
 
 		//DIRECTX
 		HRESULT InitializeDirectX();
+
+		ID3D11Device* m_pDevice{};
+		ID3D11DeviceContext* m_pDeviceContext{};
+		IDXGISwapChain* m_pSwapChain{};
+		ID3D11Texture2D* m_pDepthStencilBuffer{};
+		ID3D11DepthStencilView* m_pDepthStencilView{};
+		ID3D11Resource* m_pRenderTargetBuffer{};
+		ID3D11RenderTargetView* m_pRenderTargetView{};
 		//...
 	};
 }
