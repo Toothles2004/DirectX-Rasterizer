@@ -83,11 +83,18 @@ namespace dae {
 
 		//2. Set Pipeline + Invoke Draw Calls (= Render)
 		//Create some data for our mesh
-		std::vector<Vertex_PosCol> vertices
+		/*std::vector<Vertex_PosCol> vertices //NDC
 		{
 			{{0.f, 0.5f, 0.5f}, {1.f, 0.f, 0.f}},
 			{{0.5f, -0.5f, 0.5f}, {0.f, 0.f, 1.f}},
 			{{-0.5f, -0.5f, 0.5f}, {0.f, 1.0f, 0.f}}
+		};*/
+
+		std::vector<Vertex_PosCol> vertices //world space
+		{
+			{{0.f, 3.f, 2.f}, {1.f, 0.f, 0.f}},
+			{{3.f, -3.f, 2.f}, {0.f, 0.f, 1.f}},
+			{{-3.f, -3.f, 2.f}, {0.f, 1.0f, 0.f}}
 		};
 
 		std::vector<uint32_t> indices{ 0, 1, 2 };
