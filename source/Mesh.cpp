@@ -1,14 +1,14 @@
 #include "pch.h"
 #include "Mesh.h"
-
 #include "Effect.h"
 
 Mesh::Mesh(ID3D11Device* pDevice, const std::vector<Vertex_PosCol>& vertices, const std::vector<uint32_t>& indices)
-	: m_Vertices(vertices),
-	m_Indices(indices)
+	: m_Vertices{ vertices },
+	m_Indices{ indices }
 {
 	m_pEffect = new Effect{ pDevice, L"Resources/PosCol3D.fx"};
 	m_pTechnique = m_pEffect->GetTechnique();
+	m_pWorldMatrix = new dae::Matrix{};
 
 	//Create vertices layout
 	static constexpr uint32_t numElements{ 2 };
@@ -78,7 +78,20 @@ Mesh::Mesh(ID3D11Device* pDevice, const std::vector<Vertex_PosCol>& vertices, co
 Mesh::~Mesh()
 {
 	delete m_pEffect;
-	m_pTechnique->Release();
+	delete m_pWorldMatrix;
+	
+	if(m_pTechnique)
+	{
+		m_pTechnique->Release();
+	}
+	if(m_pVertexBuffer)
+	{
+		m_pVertexBuffer->Release();
+	}
+	if(m_pIndexBuffer)
+	{
+		m_pIndexBuffer->Release();
+	}
 }
 
 void Mesh::Render(ID3D11DeviceContext* pDeviceContext)
@@ -106,3 +119,10 @@ void Mesh::Render(ID3D11DeviceContext* pDeviceContext)
 		pDeviceContext->DrawIndexed(m_NumIndices, 0, 0);
 	}
 }
+
+void Mesh::SetMatrix(const dae::Matrix& viewProjectionMatrix) const
+{
+	m_pEffect->SetMatrix(viewProjectionMatrix, *m_pWorldMatrix);
+}
+
+

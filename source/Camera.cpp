@@ -1,35 +1,22 @@
 #include "pch.h"
 #include "Camera.h"
 
-dae::Camera::Camera(const Vector3& origin, float aspectRatio, float fovAngle)
-	: m_Origin{ origin },
-	m_FovAngle{ fovAngle },
+dae::Camera::Camera(float _aspectRatio, float _fovAngle, const Vector3& _origin) :
+	m_Origin{ _origin },
+	m_FovAngle{ _fovAngle },
 	m_Fov{ tanf((m_FovAngle * TO_RADIANS) / 2.f) },
-	m_AspectRatio{ aspectRatio },
 	m_TotalPitch{},
 	m_TotalYaw{},
+	m_AspectRatio{ _aspectRatio },
 	m_NearPlane{ 0.1f },
-	m_FarPlane{ 100.f },
-	m_Forward{ Vector3::UnitZ },
-	m_Up{ Vector3::UnitY },
-	m_Right{ Vector3::UnitX }
+	m_FarPlane{ 100.f }
 {
-
-}
-
-void dae::Camera::Initialize(float aspectRatio, float fovAngle, Vector3 origin)
-{
-	m_FovAngle = fovAngle;
-	m_Fov = tanf((m_FovAngle * TO_RADIANS) / 2.f);
-
-	m_Origin = origin;
-	m_AspectRatio = aspectRatio;
 }
 
 void dae::Camera::CalculateViewMatrix()
 {
 	//ONB => m_InvViewMatrix
-	//Inverse(ONB) => ViewMatrix
+			//Inverse(ONB) => ViewMatrix
 	m_Right = Vector3::Cross(Vector3::UnitY, m_Forward);
 	m_Up = Vector3::Cross(m_Forward, m_Right);
 
@@ -42,14 +29,13 @@ void dae::Camera::CalculateViewMatrix()
 void dae::Camera::CalculateProjectionMatrix()
 {
 	//ProjectionMatrix => Matrix::CreatePerspectiveFovLH(...) [not implemented yet]
-			//DirectX Implementation => https://learn.microsoft.com/en-us/windows/win32/direct3d9/d3dxmatrixperspectivefovlh
+	//DirectX Implementation => https://learn.microsoft.com/en-us/windows/win32/direct3d9/d3dxmatrixperspectivefovlh
 	m_ProjectionMatrix = Matrix::CreatePerspectiveFovLH(m_Fov, m_AspectRatio, m_FarPlane, m_NearPlane);
 }
 
-void dae::Camera::Update(Timer* pTimer)
+void dae::Camera::Update(const dae::Timer* pTimer)
 {
 	//Camera Update Logic
-			//...
 
 	const float deltaTime = pTimer->GetElapsed();
 	const float initFov = m_Fov;

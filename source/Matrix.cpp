@@ -146,14 +146,35 @@ namespace dae {
 
 	Matrix Matrix::CreateLookAtLH(const Vector3& origin, const Vector3& forward, const Vector3& up)
 	{
-		assert(false && "Not Implemented");
-		return {};
+		const Vector3 axisZ{ forward };
+		const Vector3 axisX{ Vector3::Cross(up, axisZ) };
+		const Vector3 axisY{ Vector3::Cross(axisZ, axisX) };
+
+		const Vector3 dotAxis{ -(Vector3::Dot(axisX, origin)), -(Vector3::Dot(axisY, origin)), -(Vector3::Dot(axisZ, origin)) };
+
+		return
+		{
+			Vector4{axisX.x, axisY.x, axisZ.x, 0},
+			Vector4{axisX.y, axisY.y, axisZ.y, 0},
+			Vector4{axisX.z, axisY.z, axisZ.z, 0},
+			Vector4{dotAxis.x, dotAxis.y, dotAxis.z, 1},
+		};
 	}
 
 	Matrix Matrix::CreatePerspectiveFovLH(float fov, float aspect, float zn, float zf)
 	{
-		assert(false && "Not Implemented");
-		return {};
+		const Vector3 axisX{ 1 / (aspect * fov), 0, 0 };
+		const Vector3 axisY{ 0, 1 / fov, 0 };
+		const Vector3 axisZ{ 0, 0, zf / (zf - zn) };
+		const Vector3 axisW{ 0, 0,  -(zf * zn) / (zf - zn) };
+
+		return
+		{
+			Vector4{axisX.x, axisY.x, axisZ.x, 0},
+			Vector4{axisX.y, axisY.y, axisZ.y, 0},
+			Vector4{axisX.z, axisY.z, axisZ.z, 1},
+			Vector4{axisW.x, axisW.y, axisW.z, 0},
+		};
 	}
 
 	Vector3 Matrix::GetAxisX() const

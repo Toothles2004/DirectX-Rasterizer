@@ -27,6 +27,7 @@ public:
 	~Mesh();
 
 	void Render(ID3D11DeviceContext* pDeviceContext);
+	void SetMatrix(const dae::Matrix& viewProjectionMatrix) const;
 
 private:
 	std::vector<Vertex_PosCol> m_Vertices{};
@@ -40,5 +41,6 @@ private:
 	ID3D11InputLayout* m_pInputLayout;
 	ID3D11Buffer* m_pVertexBuffer;
 	ID3D11Buffer* m_pIndexBuffer;
+	dae::Matrix* m_pWorldMatrix;
 };
 

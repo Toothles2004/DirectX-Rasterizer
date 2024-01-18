@@ -6,7 +6,6 @@
 #include <d3d11.h>
 #include <d3dcompiler.h>
 #include <d3dx11effect.h>
-
 #include "Mesh.h"
 
 namespace dae {
@@ -28,6 +27,7 @@ namespace dae {
 		{
 			std::cout << "DirectX initialization failed!\n";
 		}
+		m_Camera = std::make_unique<Camera>((static_cast<float>(m_Width) / m_Height), 45.f, Vector3{0.f, 0.f, -10.f});
 	}
 
 	Renderer::~Renderer()
@@ -67,9 +67,8 @@ namespace dae {
 
 	void Renderer::Update(const Timer* pTimer)
 	{
-
+		m_Camera->Update(pTimer);
 	}
-
 
 	void Renderer::Render() const
 	{
@@ -83,12 +82,12 @@ namespace dae {
 
 		//2. Set Pipeline + Invoke Draw Calls (= Render)
 		//Create some data for our mesh
-		/*std::vector<Vertex_PosCol> vertices //NDC
-		{
-			{{0.f, 0.5f, 0.5f}, {1.f, 0.f, 0.f}},
-			{{0.5f, -0.5f, 0.5f}, {0.f, 0.f, 1.f}},
-			{{-0.5f, -0.5f, 0.5f}, {0.f, 1.0f, 0.f}}
-		};*/
+		//std::vector<Vertex_PosCol> vertices //NDC
+		//{
+		//	{{0.f, 0.5f, 0.5f}, {1.f, 0.f, 0.f}},
+		//	{{0.5f, -0.5f, 0.5f}, {0.f, 0.f, 1.f}},
+		//	{{-0.5f, -0.5f, 0.5f}, {0.f, 1.0f, 0.f}}
+		//};
 
 		std::vector<Vertex_PosCol> vertices //world space
 		{
@@ -100,6 +99,7 @@ namespace dae {
 		std::vector<uint32_t> indices{ 0, 1, 2 };
 
 		Mesh* mesh = new Mesh{ m_pDevice, vertices, indices };
+		mesh->SetMatrix(m_Camera->GetViewMatrix() * m_Camera->GetProjectionMatrix());
 		mesh->Render(m_pDeviceContext);
 
 		//3. present backBuffer (SWAP)

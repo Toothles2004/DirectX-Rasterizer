@@ -10,9 +10,12 @@ public:
 	ID3DX11Effect* GetEffect();
 	ID3DX11EffectTechnique* GetTechnique();
 
+	void SetMatrix(const dae::Matrix& viewProjectionMatrix, const dae::Matrix& worldMatrix);
+
 private:
 	ID3DX11Effect* m_pEffect;
 	ID3DX11EffectTechnique* m_pTechnique;
+	ID3DX11EffectMatrixVariable* m_pMatWorldViewProjVariable;
 
 };
 
