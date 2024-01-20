@@ -79,7 +79,7 @@ Mesh::~Mesh()
 {
 	delete m_pEffect;
 	delete m_pWorldMatrix;
-	
+
 	if(m_pTechnique)
 	{
 		m_pTechnique->Release();
@@ -91,6 +91,10 @@ Mesh::~Mesh()
 	if(m_pIndexBuffer)
 	{
 		m_pIndexBuffer->Release();
+	}
+	if(m_pInputLayout)
+	{
+		m_pInputLayout->Release();
 	}
 }
 
@@ -123,6 +127,11 @@ void Mesh::Render(ID3D11DeviceContext* pDeviceContext)
 void Mesh::SetMatrix(const dae::Matrix& viewProjectionMatrix) const
 {
 	m_pEffect->SetMatrix(viewProjectionMatrix, *m_pWorldMatrix);
+}
+
+void Mesh::SetDiffuseMap(dae::Texture* pDiffuseTexture) const
+{
+	m_pEffect->SetDiffuseMap(pDiffuseTexture);
 }
 
 

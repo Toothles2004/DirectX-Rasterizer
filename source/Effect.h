@@ -1,4 +1,6 @@
 #pragma once
+#include "Texture.h"
+
 class Effect
 {
 public:
@@ -11,11 +13,13 @@ public:
 	ID3DX11EffectTechnique* GetTechnique();
 
 	void SetMatrix(const dae::Matrix& viewProjectionMatrix, const dae::Matrix& worldMatrix);
+	void SetDiffuseMap(dae::Texture* pDiffuseTexture);
 
 private:
 	ID3DX11Effect* m_pEffect;
 	ID3DX11EffectTechnique* m_pTechnique;
 	ID3DX11EffectMatrixVariable* m_pMatWorldViewProjVariable;
+	ID3DX11EffectShaderResourceVariable* m_pDiffuseMapVariable;
 
 };
 

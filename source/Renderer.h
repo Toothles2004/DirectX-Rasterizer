@@ -1,5 +1,6 @@
 #pragma once
 #include "Camera.h"
+#include "Texture.h"
 
 struct SDL_Window;
 struct SDL_Surface;
@@ -39,8 +40,10 @@ namespace dae
 		ID3D11DepthStencilView* m_pDepthStencilView{};
 		ID3D11Resource* m_pRenderTargetBuffer{};
 		ID3D11RenderTargetView* m_pRenderTargetView{};
+		Texture* m_pTexture{};
 
-		std::unique_ptr<Camera> m_Camera{};
+		std::unique_ptr<Camera> m_pCamera;
+		std::unique_ptr<Mesh> m_Mesh;
 		//...
 	};
 }

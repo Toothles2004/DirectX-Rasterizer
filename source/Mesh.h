@@ -1,15 +1,18 @@
 #pragma once
+#include "Texture.h"
 
 struct Vertex_PosCol
 {
 	dae::Vector3 position{};
 	dae::ColorRGB color{};
+	dae::Vector2 uv{};
 };
 
 struct Vertex_PosCol_Out
 {
 	dae::Vector4 position{};
 	dae::ColorRGB color{};
+	dae::Vector2 uv{};
 };
 
 enum class PrimitiveTopology
@@ -28,6 +31,7 @@ public:
 
 	void Render(ID3D11DeviceContext* pDeviceContext);
 	void SetMatrix(const dae::Matrix& viewProjectionMatrix) const;
+	void SetDiffuseMap(dae::Texture* pDiffuseTexture) const;
 
 private:
 	std::vector<Vertex_PosCol> m_Vertices{};

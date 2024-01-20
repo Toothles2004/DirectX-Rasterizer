@@ -27,7 +27,28 @@ namespace dae {
 		{
 			std::cout << "DirectX initialization failed!\n";
 		}
-		m_Camera = std::make_unique<Camera>((static_cast<float>(m_Width) / m_Height), 45.f, Vector3{0.f, 0.f, -10.f});
+		m_pCamera = std::make_unique<Camera>((static_cast<float>(m_Width) / m_Height), 45.f, Vector3{0.f, 0.f, -10.f});
+		m_pTexture = Texture::LoadFromFile("Resources/uv_grid_2.png", m_pDevice);
+
+		std::vector<Vertex_PosCol> vertices //world space
+		{
+			{{-3.f, 3.f, -2.f}, {}, { 0, 0}},
+			{{0.f, 3.f, -2.f}, {}, {0.5f, 0}},
+			{{3.f, 3.f, -2.f}, {}, {1, 0}},
+			{{-3.f, 0.f, -2.f}, {}, {0, 0.5f}},
+			{{0.f, 0.f, -2.f}, {}, {0.5f, 0.5f}},
+			{{3.f, 0.f, -2.f}, {}, {1, 0.5f}},
+			{{-3.f, -3.f, -2.f}, {}, {0, 1}},
+			{{0.f, -3.f, -2.f}, {}, {0.5, 1}},
+			{{3.f, -3.f, -2.f}, {}, {1, 1}}
+		};
+
+		std::vector<uint32_t> indices{ 3, 0, 4, 1, 5, 2, 2, 6, 6, 3, 7, 4, 8, 5 };
+
+		m_Mesh = std::make_unique<Mesh>(m_pDevice, vertices, indices);
+
+		m_Mesh->SetMatrix(m_pCamera->GetViewMatrix() * m_pCamera->GetProjectionMatrix());
+		m_Mesh->SetDiffuseMap(m_pTexture);
 	}
 
 	Renderer::~Renderer()
@@ -63,11 +84,12 @@ namespace dae {
 			m_pDeviceContext->Flush();
 			m_pDeviceContext->Release();
 		}
+		delete m_pTexture;
 	}
 
 	void Renderer::Update(const Timer* pTimer)
 	{
-		m_Camera->Update(pTimer);
+		m_pCamera->Update(pTimer);
 	}
 
 	void Renderer::Render() const
@@ -81,26 +103,7 @@ namespace dae {
 		m_pDeviceContext->ClearDepthStencilView(m_pDepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.f, 0);
 
 		//2. Set Pipeline + Invoke Draw Calls (= Render)
-		//Create some data for our mesh
-		//std::vector<Vertex_PosCol> vertices //NDC
-		//{
-		//	{{0.f, 0.5f, 0.5f}, {1.f, 0.f, 0.f}},
-		//	{{0.5f, -0.5f, 0.5f}, {0.f, 0.f, 1.f}},
-		//	{{-0.5f, -0.5f, 0.5f}, {0.f, 1.0f, 0.f}}
-		//};
-
-		std::vector<Vertex_PosCol> vertices //world space
-		{
-			{{0.f, 3.f, 2.f}, {1.f, 0.f, 0.f}},
-			{{3.f, -3.f, 2.f}, {0.f, 0.f, 1.f}},
-			{{-3.f, -3.f, 2.f}, {0.f, 1.0f, 0.f}}
-		};
-
-		std::vector<uint32_t> indices{ 0, 1, 2 };
-
-		Mesh* mesh = new Mesh{ m_pDevice, vertices, indices };
-		mesh->SetMatrix(m_Camera->GetViewMatrix() * m_Camera->GetProjectionMatrix());
-		mesh->Render(m_pDeviceContext);
+		m_Mesh->Render(m_pDeviceContext);
 
 		//3. present backBuffer (SWAP)
 		m_pSwapChain->Present(0, 0);

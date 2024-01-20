@@ -7,13 +7,19 @@ Effect::Effect(ID3D11Device* pDevice, const std::wstring& assetFile)
 	m_pTechnique = m_pEffect->GetTechniqueByName("DefaultTechnique");
 	if(!m_pTechnique->IsValid())
 	{
-		std::wcout << L"Technique not valid\n";
+		std::wcout << L"Technique not valid!\n";
 	}
 
 	m_pMatWorldViewProjVariable = m_pEffect->GetVariableByName("gWorldViewProj")->AsMatrix();
 	if(!m_pMatWorldViewProjVariable->IsValid())
 	{
-		std::wcout << L"m_pMatWorldViewProjVariable not valid\n";
+		std::wcout << L"m_pMatWorldViewProjVariable not valid!\n";
+	}
+
+	m_pDiffuseMapVariable = m_pEffect->GetVariableByName("gDiffuseMap")->AsShaderResource();
+	if(!m_pDiffuseMapVariable->IsValid())
+	{
+		std::wcout << L"m_pDiffuseMapVariable not valid!\n";
 	}
 }
 
@@ -23,13 +29,17 @@ Effect::~Effect()
 	{
 		m_pEffect->Release();
 	}
-	if(m_pTechnique)
+	if (m_pTechnique)
 	{
 		m_pTechnique->Release();
 	}
 	if(m_pMatWorldViewProjVariable)
 	{
 		m_pMatWorldViewProjVariable->Release();
+	}
+	if(m_pDiffuseMapVariable)
+	{
+		m_pDiffuseMapVariable->Release();
 	}
 }
 
@@ -102,5 +112,13 @@ void Effect::SetMatrix(const dae::Matrix& viewProjectionMatrix, const dae::Matri
 {
 	const auto tempMatrix = viewProjectionMatrix * worldMatrix;
 	m_pMatWorldViewProjVariable->SetMatrix(reinterpret_cast<const float*>(&(tempMatrix)));
+}
+
+void Effect::SetDiffuseMap(dae::Texture* pDiffuseTexture)
+{
+	if(m_pDiffuseMapVariable)
+	{
+		m_pDiffuseMapVariable->SetResource(pDiffuseTexture->GetSRV());
+	}
 }
 
