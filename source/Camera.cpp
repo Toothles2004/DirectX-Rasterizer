@@ -9,7 +9,9 @@ dae::Camera::Camera(float _aspectRatio, float _fovAngle, const Vector3& _origin)
 	m_TotalYaw{},
 	m_AspectRatio{ _aspectRatio },
 	m_NearPlane{ 0.1f },
-	m_FarPlane{ 100.f }
+	m_FarPlane{ 100.f },
+	m_MoveSpeed{ 25.f },
+	m_RotSpeed{ 150.f * TO_RADIANS }
 {
 }
 
@@ -61,9 +63,6 @@ void dae::Camera::Update(const dae::Timer* pTimer)
 
 	if (keysUsed || mouseState & SDL_BUTTON_RMASK || mouseState & SDL_BUTTON_LMASK)
 	{
-		constexpr float moveSpeed{ 10.f };
-		constexpr float rotSpeed{ 10.f * TO_RADIANS };
-		//constexpr float fovSpeed{ 1500.f * TO_RADIANS };
 
 		const bool keyUp = pKeyboardState[SDL_SCANCODE_UP] + pKeyboardState[SDL_SCANCODE_W];
 		const bool keyDown = pKeyboardState[SDL_SCANCODE_DOWN] + pKeyboardState[SDL_SCANCODE_S];
@@ -76,7 +75,7 @@ void dae::Camera::Update(const dae::Timer* pTimer)
 
 		//CALCULATE CAMERA MOVEMENT:
 		m_Origin +=
-			moveSpeed *                           //Multiply the movement vectors with the speed
+			m_MoveSpeed *                           //Multiply the movement vectors with the speed
 			deltaTime *
 			(
 				//Calculate m_Forward
@@ -100,8 +99,8 @@ void dae::Camera::Update(const dae::Timer* pTimer)
 				);
 
 		//CALCULATE CAMERA ROTATION:
-		m_TotalYaw += rotSpeed * deltaTime * (mouseX * (buttonLeft ^ buttonRight));				//MBL xor MBR:  move camera yaw using mouseX
-		m_TotalPitch += rotSpeed * deltaTime * (-mouseY) * (buttonRight);							//MBR : move camera pitch using mouseY
+		m_TotalYaw += m_RotSpeed * deltaTime * (mouseX * (buttonLeft ^ buttonRight));				//MBL xor MBR:  move camera yaw using mouseX
+		m_TotalPitch += m_RotSpeed * deltaTime * (-mouseY) * (buttonRight);							//MBR : move camera pitch using mouseY
 
 		m_Forward =
 			Matrix::CreateRotation(

@@ -40,5 +40,7 @@ namespace dae
 
 		float m_NearPlane;
 		float m_FarPlane;
+		float m_MoveSpeed;
+		float m_RotSpeed;
 	};
 }

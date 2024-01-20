@@ -26,7 +26,7 @@ class Effect;
 class Mesh
 {
 public:
-	Mesh(ID3D11Device* pDevice, const std::vector<Vertex_PosCol>& vertices, const std::vector<uint32_t>& indices);
+	Mesh(ID3D11Device* pDevice, const std::string& filename);
 	~Mesh();
 
 	void Render(ID3D11DeviceContext* pDeviceContext);

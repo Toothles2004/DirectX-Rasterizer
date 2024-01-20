@@ -1,17 +1,19 @@
 #include "pch.h"
 #include "Mesh.h"
 #include "Effect.h"
+#include "Utils.h"
 
-Mesh::Mesh(ID3D11Device* pDevice, const std::vector<Vertex_PosCol>& vertices, const std::vector<uint32_t>& indices)
-	: m_Vertices{ vertices },
-	m_Indices{ indices }
+Mesh::Mesh(ID3D11Device* pDevice, const std::string& filename)
 {
+	dae::Utils::ParseOBJ(filename, m_Vertices, m_Indices);
+	m_VerticesOut.resize(m_Vertices.size());
+
 	m_pEffect = new Effect{ pDevice, L"Resources/PosCol3D.fx"};
 	m_pTechnique = m_pEffect->GetTechnique();
 	m_pWorldMatrix = new dae::Matrix{};
 
 	//Create vertices layout
-	static constexpr uint32_t numElements{ 2 };
+	static constexpr uint32_t numElements{ 3 };
 	D3D11_INPUT_ELEMENT_DESC vertexDesc[numElements]{};
 
 	vertexDesc[0].SemanticName = "POSITION";
@@ -23,6 +25,11 @@ Mesh::Mesh(ID3D11Device* pDevice, const std::vector<Vertex_PosCol>& vertices, co
 	vertexDesc[1].Format = DXGI_FORMAT_R32G32B32_FLOAT;
 	vertexDesc[1].AlignedByteOffset = 12;
 	vertexDesc[1].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+
+	vertexDesc[2].SemanticName = "TEXCOORD";
+	vertexDesc[2].Format = DXGI_FORMAT_R32G32B32_FLOAT;
+	vertexDesc[2].AlignedByteOffset = 24;
+	vertexDesc[2].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
 
 	//Create input layout
 	D3DX11_PASS_DESC passDesc{};
@@ -45,13 +52,13 @@ Mesh::Mesh(ID3D11Device* pDevice, const std::vector<Vertex_PosCol>& vertices, co
 	//Create vertices buffer
 	D3D11_BUFFER_DESC bd = {};
 	bd.Usage = D3D11_USAGE_IMMUTABLE;
-	bd.ByteWidth = sizeof(Vertex_PosCol) * static_cast<uint32_t>(vertices.size());
+	bd.ByteWidth = sizeof(Vertex_PosCol) * static_cast<uint32_t>(m_Vertices.size());
 	bd.BindFlags = D3D11_BIND_INDEX_BUFFER;
 	bd.CPUAccessFlags = 0;
 	bd.MiscFlags = 0;
 
 	D3D11_SUBRESOURCE_DATA initData = {};
-	initData.pSysMem = vertices.data();
+	initData.pSysMem = m_Vertices.data();
 
 	result = pDevice->CreateBuffer(&bd, &initData, &m_pVertexBuffer);
 	if (FAILED(result))
@@ -60,13 +67,13 @@ Mesh::Mesh(ID3D11Device* pDevice, const std::vector<Vertex_PosCol>& vertices, co
 	}
 
 	//Create index buffer
-	m_NumIndices = static_cast<uint32_t>(indices.size());
+	m_NumIndices = static_cast<uint32_t>(m_Indices.size());
 	bd.Usage = D3D11_USAGE_IMMUTABLE;
 	bd.ByteWidth = sizeof(uint32_t) * m_NumIndices;
 	bd.BindFlags = D3D11_BIND_INDEX_BUFFER;
 	bd.CPUAccessFlags = 0;
 	bd.MiscFlags = 0;
-	initData.pSysMem = indices.data();
+	initData.pSysMem = m_Indices.data();
 
 	result = pDevice->CreateBuffer(&bd, &initData, &m_pIndexBuffer);
 	if (FAILED(result))
