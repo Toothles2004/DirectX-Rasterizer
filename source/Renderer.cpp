@@ -11,7 +11,8 @@
 namespace dae {
 
 	Renderer::Renderer(SDL_Window* pWindow) :
-		m_pWindow(pWindow)
+		m_pWindow(pWindow),
+		m_MeshRotation{}
 	{
 		//Initialize
 		SDL_GetWindowSize(pWindow, &m_Width, &m_Height);
@@ -28,7 +29,7 @@ namespace dae {
 			std::cout << "DirectX initialization failed!\n";
 		}
 
-		m_pCamera = Camera((static_cast<float>(m_Width) / m_Height), 45.f, Vector3{ 0.f, 0.f, -30.f });
+		m_pCamera = Camera((static_cast<float>(m_Width) / m_Height), 45.f, Vector3{ 0.f, 0.f, -50.f });
 		m_pDiffuseTexture = Texture::LoadFromFile("Resources/vehicle_diffuse.png", m_pDevice);
 		m_pNormalTexture = Texture::LoadFromFile("Resources/vehicle_normal.png", m_pDevice);
 		m_pSpecularTexture = Texture::LoadFromFile("Resources/vehicle_specular.png", m_pDevice);
@@ -76,7 +77,10 @@ namespace dae {
 	void Renderer::Update(const Timer* pTimer)
 	{
 		m_pCamera.Update(pTimer);
-		m_Mesh->Rotate(pTimer->GetElapsed());
+		
+		m_MeshRotation += pTimer->GetElapsed() * 45.f * (PI / 180.f);
+
+		//m_Mesh->Rotate(m_MeshRotation);
 	}
 
 	void Renderer::Render() const
@@ -85,7 +89,7 @@ namespace dae {
 			return;
 
 		//1. CLEAR RTV & DSV
-		constexpr float color[4] = { 0.f, 0.f, 0.3f, 1.f };
+		constexpr float color[4] = { .39f, .59f, .93f, 1.f };
 		m_pDeviceContext->ClearRenderTargetView(m_pRenderTargetView, color);
 		m_pDeviceContext->ClearDepthStencilView(m_pDepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.f, 0);
 
@@ -99,6 +103,11 @@ namespace dae {
 	void Renderer::ToggleFilteringMethod()
 	{
 		m_Mesh->IncrementTechniqueId();
+	}
+
+	void Renderer::ToggleNormal()
+	{
+		m_Mesh->ToggleNormal();
 	}
 
 	HRESULT Renderer::InitializeDirectX()

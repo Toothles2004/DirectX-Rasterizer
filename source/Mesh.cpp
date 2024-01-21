@@ -142,11 +142,30 @@ void Mesh::IncrementTechniqueId()
 {
 	m_CurrentTechniqueId = (m_CurrentTechniqueId + 1) % m_pEffect->GetTechniqueCount();
 	m_pTechnique = m_pEffect->GetTechnique(m_CurrentTechniqueId);
+	std::cout << "Toggle sampling state, current state: ";
+	switch(m_CurrentTechniqueId)
+	{
+	case 0:
+		std::cout << "Point\n";
+		break;
+	case 1:
+		std::cout << "Linear\n";
+		break;
+	case 2:
+		std::cout << "Anisotropic\n";
+		break;
+	}
 }
 
 void Mesh::Rotate(float angle)
 {
-	m_pWorldMatrix = m_pWorldMatrix.CreateRotationY(angle);
+	//m_pWorldMatrix = m_pWorldMatrix.CreateRotationY(angle);
+	m_pWorldMatrix = dae::Matrix::CreateRotation(0,angle, 0);
+}
+
+void Mesh::ToggleNormal()
+{
+	m_pEffect->ToggleNormal();
 }
 
 

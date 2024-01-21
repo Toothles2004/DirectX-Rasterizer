@@ -30,7 +30,9 @@ float3 gLightDir = { 0.577f, -0.577f, 0.577f};
 float gPI = 3.14159265359f;
 float gLightIntensity = 7.f;
 float gShininess = 25.f;
-float3 gAmbient = { 0.025f, 0.025f, 0.025f };
+float3 gAmbient = { 0.03f, 0.03f, 0.03f };
+
+bool gNormalOn = {false};
 
 SamplerState samPoint
 {
@@ -73,18 +75,27 @@ float4 PS(VS_OUTPUT input, SamplerState state) : SV_TARGET
     float3 binormal = cross(input.Normal, input.Tangent);
     float4x4 tangentSpaceAxis = float4x4(float4(input.Tangent, 0.f), float4(binormal, 0.f), float4(input.Normal, 0.f), float4(0.f, 0.f, 0.f, 1.f));
 
-    float3 sampleNormal = gNormalMap.Sample(state, input.Uv);
     float3 glossiness = gGlossinessMap.Sample(state, input.Uv);
     float3 specular =  gSpecularMap.Sample(state, input.Uv);
     float3 diffuse = gDiffuseMap.Sample(state, input.Uv);
 
     diffuse *= gLightIntensity;
     diffuse /= gPI;
-    
-    sampleNormal /= 255.f;
-    sampleNormal *= 2.f;
-    sampleNormal -= float3(1.f, 1.f, 1.f);
-    sampleNormal = mul(float4(sampleNormal, 0.f), (float4x4) tangentSpaceAxis);
+
+    float3 sampleNormal = (float3)0;
+
+    if (gNormalOn)
+    {
+        sampleNormal = gNormalMap.Sample(state, input.Uv);
+        sampleNormal /= 255.f;
+        sampleNormal *= 2.f;
+        sampleNormal -= float3(1.f, 1.f, 1.f);
+        sampleNormal = mul(float4(sampleNormal, 0.f), (float4x4) tangentSpaceAxis);
+    }
+    else
+    {
+        sampleNormal = input.Normal;
+    }
 
     float observedArea = saturate(dot(sampleNormal, gLightDir));
 

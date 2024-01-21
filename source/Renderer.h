@@ -22,6 +22,7 @@ namespace dae
 		void Update(const Timer* pTimer);
 		void Render() const;
 		void ToggleFilteringMethod();
+		void ToggleNormal();
 
 	private:
 		SDL_Window* m_pWindow{};
@@ -48,6 +49,7 @@ namespace dae
 
 		Camera m_pCamera{};
 		std::unique_ptr<Mesh> m_Mesh;
+		float m_MeshRotation;
 		//...
 	};
 }

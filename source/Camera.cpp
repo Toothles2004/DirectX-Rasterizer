@@ -70,6 +70,7 @@ void dae::Camera::Update(const dae::Timer* pTimer)
 		const bool keyDown = pKeyboardState[SDL_SCANCODE_DOWN] + pKeyboardState[SDL_SCANCODE_S];
 		const bool keyLeft = pKeyboardState[SDL_SCANCODE_LEFT] + pKeyboardState[SDL_SCANCODE_A];
 		const bool keyRight = pKeyboardState[SDL_SCANCODE_RIGHT] + pKeyboardState[SDL_SCANCODE_D];
+		const bool shift = pKeyboardState[SDL_SCANCODE_LSHIFT];
 
 		const bool buttonLeft = static_cast<bool>(mouseState & SDL_BUTTON_LMASK);
 		const bool buttonRight = static_cast<bool>(mouseState & SDL_BUTTON_RMASK);
@@ -77,7 +78,7 @@ void dae::Camera::Update(const dae::Timer* pTimer)
 
 		//CALCULATE CAMERA MOVEMENT:
 		m_Origin +=
-			m_MoveSpeed *                           //Multiply the movement vectors with the speed
+			(m_MoveSpeed + (m_MoveSpeed * shift)) *                           //Multiply the movement vectors with the speed
 			deltaTime *
 			(
 				//Calculate m_Forward

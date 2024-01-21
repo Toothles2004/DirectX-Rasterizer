@@ -63,6 +63,10 @@ Effect::Effect(ID3D11Device* pDevice, const std::wstring& assetFile, const dae::
 	{
 		std::wcout << L"m_pCameraPosVariable not valid!\n";
 	}
+
+	m_NormalMap = true;
+	m_NormalMapOnVariable = m_pEffect->GetVariableByName("gNormalOn")->AsScalar();
+	m_NormalMapOnVariable->SetBool(m_NormalMap);
 }
 
 Effect::~Effect()
@@ -183,4 +187,11 @@ void Effect::SetMatrix(const dae::Camera& camera, const dae::Matrix& worldMatrix
 int Effect::GetTechniqueCount() const
 {
 	return static_cast<int>(m_pTechnique.size());
+}
+
+void Effect::ToggleNormal()
+{
+	m_NormalMap = !m_NormalMap;
+	m_NormalMapOnVariable->SetBool(m_NormalMap);
+	std::cout << "Normal map Toggled\n";
 }

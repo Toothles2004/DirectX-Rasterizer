@@ -15,6 +15,7 @@ public:
 
 	void SetMatrix(const dae::Camera& camera, const dae::Matrix& worldMatrix);
 	int GetTechniqueCount() const;
+	void ToggleNormal();
 
 private:
 	ID3DX11Effect* m_pEffect;
@@ -27,5 +28,7 @@ private:
 	ID3DX11EffectMatrixVariable* m_pWorldMatrixVariable;
 	ID3DX11EffectVectorVariable* m_pCameraPosVariable;
 	ID3D11Device* m_pDevice{};
+	bool m_NormalMap;
+	ID3DX11EffectScalarVariable* m_NormalMapOnVariable;
 
 };

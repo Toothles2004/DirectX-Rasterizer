@@ -36,6 +36,7 @@ public:
 	void Render(ID3D11DeviceContext* pDeviceContext, const dae::Camera& camera);
 	void IncrementTechniqueId();
 	void Rotate(float angle);
+	void ToggleNormal();
 
 private:
 	std::vector<Vertex_PosCol> m_Vertices{};
