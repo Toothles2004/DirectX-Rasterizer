@@ -30,9 +30,11 @@ void dae::Camera::CalculateViewMatrix()
 
 void dae::Camera::CalculateProjectionMatrix()
 {
-	//ProjectionMatrix => Matrix::CreatePerspectiveFovLH(...) [not implemented yet]
-	//DirectX Implementation => https://learn.microsoft.com/en-us/windows/win32/direct3d9/d3dxmatrixperspectivefovlh
-	m_ProjectionMatrix = Matrix::CreatePerspectiveFovLH(m_Fov, m_AspectRatio, m_FarPlane, m_NearPlane);
+	Vector4 line1 = { 1.f / (m_AspectRatio * m_Fov), 0, 0,0 };
+	Vector4 line2 = { 0, 1.f / m_Fov, 0, 0};
+	Vector4 line3 = { 0, 0, m_FarPlane / (m_FarPlane - m_NearPlane), 1};
+	Vector4 line4 = { 0, 0, -(m_FarPlane * m_NearPlane) / (m_FarPlane - m_NearPlane), 0};
+	m_ProjectionMatrix = {line1, line2, line3, line4};
 }
 
 void dae::Camera::Update(const dae::Timer* pTimer)
@@ -99,8 +101,8 @@ void dae::Camera::Update(const dae::Timer* pTimer)
 				);
 
 		//CALCULATE CAMERA ROTATION:
-		m_TotalYaw += m_RotSpeed * deltaTime * (mouseX * (buttonLeft ^ buttonRight));				//MBL xor MBR:  move camera yaw using mouseX
-		m_TotalPitch += m_RotSpeed * deltaTime * (-mouseY) * (buttonRight);							//MBR : move camera pitch using mouseY
+		m_TotalYaw += (m_RotSpeed * deltaTime * (mouseX * (buttonLeft ^ buttonRight))) * 10.f;				//MBL xor MBR:  move camera yaw using mouseX
+		m_TotalPitch += (m_RotSpeed * deltaTime * (-mouseY) * (buttonRight)) * 10.f;							//MBR : move camera pitch using mouseY
 
 		m_Forward =
 			Matrix::CreateRotation(

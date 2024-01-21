@@ -46,7 +46,7 @@ namespace dae
 		Texture* m_pSpecularTexture{};
 		Texture* m_pGlossinessTexture{};
 
-		std::unique_ptr<Camera> m_pCamera;
+		Camera m_pCamera{};
 		std::unique_ptr<Mesh> m_Mesh;
 		//...
 	};

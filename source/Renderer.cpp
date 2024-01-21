@@ -27,7 +27,8 @@ namespace dae {
 		{
 			std::cout << "DirectX initialization failed!\n";
 		}
-		m_pCamera = std::make_unique<Camera>((static_cast<float>(m_Width) / m_Height), 45.f, Vector3{0.f, 0.f, -30.f});
+
+		m_pCamera = Camera((static_cast<float>(m_Width) / m_Height), 45.f, Vector3{ 0.f, 0.f, -30.f });
 		m_pDiffuseTexture = Texture::LoadFromFile("Resources/vehicle_diffuse.png", m_pDevice);
 		m_pNormalTexture = Texture::LoadFromFile("Resources/vehicle_normal.png", m_pDevice);
 		m_pSpecularTexture = Texture::LoadFromFile("Resources/vehicle_specular.png", m_pDevice);
@@ -74,7 +75,7 @@ namespace dae {
 
 	void Renderer::Update(const Timer* pTimer)
 	{
-		m_pCamera->Update(pTimer);
+		m_pCamera.Update(pTimer);
 		m_Mesh->Rotate(pTimer->GetElapsed());
 	}
 
@@ -89,7 +90,7 @@ namespace dae {
 		m_pDeviceContext->ClearDepthStencilView(m_pDepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.f, 0);
 
 		//2. Set Pipeline + Invoke Draw Calls (= Render)
-		m_Mesh->Render(m_pDeviceContext, *m_pCamera);
+		m_Mesh->Render(m_pDeviceContext, m_pCamera);
 
 		//3. present backBuffer (SWAP)
 		m_pSwapChain->Present(0, 0);
