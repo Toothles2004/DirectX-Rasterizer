@@ -30,15 +30,10 @@ class Effect;
 class Mesh
 {
 public:
-	Mesh(ID3D11Device* pDevice, const std::string& filename, std::vector<Vertex_PosCol> vertices, std::vector<uint32_t> indices);
+	Mesh(ID3D11Device* pDevice, const std::string& filename, const dae::Texture* pDiffuse, const dae::Texture* pNormal, const dae::Texture* pSpecular, const dae::Texture* pGlossiness);
 	~Mesh();
 
-	void Render(ID3D11DeviceContext* pDeviceContext);
-	void SetMatrix(const dae::Camera&camera) const;
-	void SetDiffuseMap(dae::Texture* pDiffuseTexture) const;
-	void SetNormalMap(dae::Texture* pNormalTexture) const;
-	void SetSpecularMap(dae::Texture* pSpecularTexture) const;
-	void SetGlossinessMap(dae::Texture* pGLossinessTexture) const;
+	void Render(ID3D11DeviceContext* pDeviceContext, const dae::Camera& camera);
 	void IncrementTechniqueId();
 	void Rotate(float angle);
 

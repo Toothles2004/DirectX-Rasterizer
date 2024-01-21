@@ -92,8 +92,7 @@ float4 PS(VS_OUTPUT input, SamplerState state) : SV_TARGET
 
     specular = specular * (float) (pow(saturate(dot(reflect(-gLightDir, sampleNormal), invViewDirection)), glossiness.r));
 
-    //return float4(observedArea * (diffuse + specular + gAmbient), 1.f);
-    return float4(diffuse, 1.f);
+    return float4(observedArea * (diffuse + specular + gAmbient), 1.f);
 }
 
 

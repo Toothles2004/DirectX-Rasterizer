@@ -33,27 +33,7 @@ namespace dae {
 		m_pSpecularTexture = Texture::LoadFromFile("Resources/vehicle_specular.png", m_pDevice);
 		m_pGlossinessTexture = Texture::LoadFromFile("Resources/vehicle_gloss.png", m_pDevice);
 
-		const std::vector<Vertex_PosCol> vertices{
-			{ { -4.f, 4.f, 2.f }, { 0.f, 0.f } },
-			{ { 4.f, 4.f, 2.f }, { 1.f, 0.f } },
-			{ { -4.f, -4.f, 2.f }, { 0.f, 1.f } },
-			{ { 4.f, -4.f, 2.f }, { 1.f, 1.f } },
-		};
-		const std::vector<uint32_t> indices{
-			0, 3, 2,
-			0, 1, 3,
-		};
-
-		m_Mesh = std::make_unique<Mesh>(
-			m_pDevice,
-			"Resources/uv_grid_2.png",
-			vertices, indices);
-
-		/*m_Mesh = std::make_unique<Mesh>(m_pDevice, "Resources/cube.obj");
-		m_Mesh->SetDiffuseMap(m_pDiffuseTexture);
-		m_Mesh->SetNormalMap(m_pNormalTexture);
-		m_Mesh->SetSpecularMap(m_pSpecularTexture);
-		m_Mesh->SetGlossinessMap(m_pGlossinessTexture);*/
+		m_Mesh = std::make_unique<Mesh>(m_pDevice, "Resources/vehicle.obj", m_pDiffuseTexture, m_pNormalTexture, m_pSpecularTexture, m_pGlossinessTexture);
 	}
 
 	Renderer::~Renderer()
@@ -109,8 +89,7 @@ namespace dae {
 		m_pDeviceContext->ClearDepthStencilView(m_pDepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.f, 0);
 
 		//2. Set Pipeline + Invoke Draw Calls (= Render)
-		m_Mesh->SetMatrix(*m_pCamera);
-		m_Mesh->Render(m_pDeviceContext);
+		m_Mesh->Render(m_pDeviceContext, *m_pCamera);
 
 		//3. present backBuffer (SWAP)
 		m_pSwapChain->Present(0, 0);
