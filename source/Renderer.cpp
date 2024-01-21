@@ -93,6 +93,11 @@ namespace dae {
 		m_pSwapChain->Present(0, 0);
 	}
 
+	void Renderer::ToggleFilteringMethod()
+	{
+		m_Mesh->IncrementTechniqueId();
+	}
+
 	HRESULT Renderer::InitializeDirectX()
 	{
 		//1. Create Device & DeviceContext

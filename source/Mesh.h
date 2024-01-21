@@ -32,6 +32,7 @@ public:
 	void Render(ID3D11DeviceContext* pDeviceContext);
 	void SetMatrix(const dae::Matrix& viewProjectionMatrix) const;
 	void SetDiffuseMap(dae::Texture* pDiffuseTexture) const;
+	void IncrementTechniqueId();
 
 private:
 	std::vector<Vertex_PosCol> m_Vertices{};
@@ -46,5 +47,6 @@ private:
 	ID3D11Buffer* m_pVertexBuffer;
 	ID3D11Buffer* m_pIndexBuffer;
 	dae::Matrix* m_pWorldMatrix;
+	int m_CurrentTechniqueId;
 };
 

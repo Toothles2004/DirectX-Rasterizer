@@ -4,12 +4,13 @@
 #include "Utils.h"
 
 Mesh::Mesh(ID3D11Device* pDevice, const std::string& filename)
+	: m_CurrentTechniqueId{0}
 {
 	dae::Utils::ParseOBJ(filename, m_Vertices, m_Indices);
 	m_VerticesOut.resize(m_Vertices.size());
 
 	m_pEffect = new Effect{ pDevice, L"Resources/PosCol3D.fx"};
-	m_pTechnique = m_pEffect->GetTechnique();
+	m_pTechnique = m_pEffect->GetTechnique(m_CurrentTechniqueId);
 	m_pWorldMatrix = new dae::Matrix{};
 
 	//Create vertices layout
@@ -123,10 +124,10 @@ void Mesh::Render(ID3D11DeviceContext* pDeviceContext)
 
 	//5. Draw
 	D3DX11_TECHNIQUE_DESC techDesc{};
-	m_pEffect->GetTechnique()->GetDesc(&techDesc);
+	m_pEffect->GetTechnique(m_CurrentTechniqueId)->GetDesc(&techDesc);
 	for(UINT p{}; p < techDesc.Passes; ++p)
 	{
-		m_pEffect->GetTechnique()->GetPassByIndex(p)->Apply(0, pDeviceContext);
+		m_pEffect->GetTechnique(m_CurrentTechniqueId)->GetPassByIndex(p)->Apply(0, pDeviceContext);
 		pDeviceContext->DrawIndexed(m_NumIndices, 0, 0);
 	}
 }
@@ -139,6 +140,12 @@ void Mesh::SetMatrix(const dae::Matrix& viewProjectionMatrix) const
 void Mesh::SetDiffuseMap(dae::Texture* pDiffuseTexture) const
 {
 	m_pEffect->SetDiffuseMap(pDiffuseTexture);
+}
+
+void Mesh::IncrementTechniqueId()
+{
+	m_CurrentTechniqueId = (m_CurrentTechniqueId + 1) % m_pEffect->GetTechniqueCount();
+	m_pTechnique = m_pEffect->GetTechnique(m_CurrentTechniqueId);
 }
 
 
