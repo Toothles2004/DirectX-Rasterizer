@@ -1,18 +1,22 @@
 #pragma once
+#include "Camera.h"
 #include "Texture.h"
 
 struct Vertex_PosCol
 {
 	dae::Vector3 position{};
-	dae::ColorRGB color{};
 	dae::Vector2 uv{};
+	dae::Vector3 normal{};
+	dae::Vector3 tangent{};
 };
 
 struct Vertex_PosCol_Out
 {
 	dae::Vector4 position{};
-	dae::ColorRGB color{};
+	dae::Vector4 worldPosition{};
 	dae::Vector2 uv{};
+	dae::Vector3 normal{};
+	dae::Vector3 tangent{};
 };
 
 enum class PrimitiveTopology
@@ -26,19 +30,23 @@ class Effect;
 class Mesh
 {
 public:
-	Mesh(ID3D11Device* pDevice, const std::string& filename);
+	Mesh(ID3D11Device* pDevice, const std::string& filename, std::vector<Vertex_PosCol> vertices, std::vector<uint32_t> indices);
 	~Mesh();
 
 	void Render(ID3D11DeviceContext* pDeviceContext);
-	void SetMatrix(const dae::Matrix& viewProjectionMatrix) const;
+	void SetMatrix(const dae::Camera&camera) const;
 	void SetDiffuseMap(dae::Texture* pDiffuseTexture) const;
+	void SetNormalMap(dae::Texture* pNormalTexture) const;
+	void SetSpecularMap(dae::Texture* pSpecularTexture) const;
+	void SetGlossinessMap(dae::Texture* pGLossinessTexture) const;
 	void IncrementTechniqueId();
+	void Rotate(float angle);
 
 private:
 	std::vector<Vertex_PosCol> m_Vertices{};
 	std::vector<uint32_t> m_Indices{};
 	uint32_t m_NumIndices{};
-	PrimitiveTopology m_PrimitiveTopology{ PrimitiveTopology::TriangleStrip };
+	PrimitiveTopology m_PrimitiveTopology{ PrimitiveTopology::TriangleList };
 
 	std::vector<Vertex_PosCol_Out> m_VerticesOut{};
 	Effect* m_pEffect;
@@ -46,7 +54,7 @@ private:
 	ID3D11InputLayout* m_pInputLayout;
 	ID3D11Buffer* m_pVertexBuffer;
 	ID3D11Buffer* m_pIndexBuffer;
-	dae::Matrix* m_pWorldMatrix;
+	dae::Matrix m_pWorldMatrix;
 	int m_CurrentTechniqueId;
 };
 

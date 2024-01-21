@@ -3,18 +3,18 @@
 #include "Effect.h"
 #include "Utils.h"
 
-Mesh::Mesh(ID3D11Device* pDevice, const std::string& filename)
+Mesh::Mesh(ID3D11Device* pDevice, const std::string& filename, std::vector<Vertex_PosCol> vertices, std::vector<uint32_t> indices)
 	: m_CurrentTechniqueId{0}
 {
-	dae::Utils::ParseOBJ(filename, m_Vertices, m_Indices);
-	m_VerticesOut.resize(m_Vertices.size());
+	//dae::Utils::ParseOBJ(filename, m_Vertices, m_Indices);
+	//m_VerticesOut.resize(m_Vertices.size());
 
 	m_pEffect = new Effect{ pDevice, L"Resources/PosCol3D.fx"};
 	m_pTechnique = m_pEffect->GetTechnique(m_CurrentTechniqueId);
-	m_pWorldMatrix = new dae::Matrix{};
+	m_pWorldMatrix = dae::Matrix{};
 
 	//Create vertices layout
-	static constexpr uint32_t numElements{ 3 };
+	static constexpr uint32_t numElements{ 4 };
 	D3D11_INPUT_ELEMENT_DESC vertexDesc[numElements]{};
 
 	vertexDesc[0].SemanticName = "POSITION";
@@ -22,15 +22,21 @@ Mesh::Mesh(ID3D11Device* pDevice, const std::string& filename)
 	vertexDesc[0].AlignedByteOffset = 0;
 	vertexDesc[0].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
 
-	vertexDesc[1].SemanticName = "COLOR";
-	vertexDesc[1].Format = DXGI_FORMAT_R32G32B32_FLOAT;
-	vertexDesc[1].AlignedByteOffset = 12;
+	vertexDesc[1].SemanticName = "TEXCOORD";
+	vertexDesc[1].Format = DXGI_FORMAT_R32G32_FLOAT;
+	vertexDesc[1].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
 	vertexDesc[1].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
 
-	vertexDesc[2].SemanticName = "TEXCOORD";
+	vertexDesc[2].SemanticName = "NORMAL";
 	vertexDesc[2].Format = DXGI_FORMAT_R32G32B32_FLOAT;
-	vertexDesc[2].AlignedByteOffset = 24;
+	vertexDesc[2].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
 	vertexDesc[2].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+
+	vertexDesc[3].SemanticName = "TANGENT";
+	vertexDesc[3].Format = DXGI_FORMAT_R32G32B32_FLOAT;
+	vertexDesc[3].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
+	vertexDesc[3].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+
 
 	//Create input layout
 	D3DX11_PASS_DESC passDesc{};
@@ -53,13 +59,13 @@ Mesh::Mesh(ID3D11Device* pDevice, const std::string& filename)
 	//Create vertices buffer
 	D3D11_BUFFER_DESC bd = {};
 	bd.Usage = D3D11_USAGE_IMMUTABLE;
-	bd.ByteWidth = sizeof(Vertex_PosCol) * static_cast<uint32_t>(m_Vertices.size());
+	bd.ByteWidth = sizeof(Vertex_PosCol) * static_cast<uint32_t>(vertices.size());
 	bd.BindFlags = D3D11_BIND_INDEX_BUFFER;
 	bd.CPUAccessFlags = 0;
 	bd.MiscFlags = 0;
 
 	D3D11_SUBRESOURCE_DATA initData = {};
-	initData.pSysMem = m_Vertices.data();
+	initData.pSysMem = vertices.data();
 
 	result = pDevice->CreateBuffer(&bd, &initData, &m_pVertexBuffer);
 	if (FAILED(result))
@@ -68,13 +74,13 @@ Mesh::Mesh(ID3D11Device* pDevice, const std::string& filename)
 	}
 
 	//Create index buffer
-	m_NumIndices = static_cast<uint32_t>(m_Indices.size());
+	m_NumIndices = static_cast<uint32_t>(indices.size());
 	bd.Usage = D3D11_USAGE_IMMUTABLE;
 	bd.ByteWidth = sizeof(uint32_t) * m_NumIndices;
 	bd.BindFlags = D3D11_BIND_INDEX_BUFFER;
 	bd.CPUAccessFlags = 0;
 	bd.MiscFlags = 0;
-	initData.pSysMem = m_Indices.data();
+	initData.pSysMem = indices.data();
 
 	result = pDevice->CreateBuffer(&bd, &initData, &m_pIndexBuffer);
 	if (FAILED(result))
@@ -86,7 +92,6 @@ Mesh::Mesh(ID3D11Device* pDevice, const std::string& filename)
 Mesh::~Mesh()
 {
 	delete m_pEffect;
-	delete m_pWorldMatrix;
 
 	if(m_pTechnique)
 	{
@@ -132,9 +137,9 @@ void Mesh::Render(ID3D11DeviceContext* pDeviceContext)
 	}
 }
 
-void Mesh::SetMatrix(const dae::Matrix& viewProjectionMatrix) const
+void Mesh::SetMatrix(const dae::Camera&camera) const
 {
-	m_pEffect->SetMatrix(viewProjectionMatrix, *m_pWorldMatrix);
+	m_pEffect->SetMatrix(camera, m_pWorldMatrix);
 }
 
 void Mesh::SetDiffuseMap(dae::Texture* pDiffuseTexture) const
@@ -142,10 +147,30 @@ void Mesh::SetDiffuseMap(dae::Texture* pDiffuseTexture) const
 	m_pEffect->SetDiffuseMap(pDiffuseTexture);
 }
 
+void Mesh::SetNormalMap(dae::Texture* pNormalTexture) const
+{
+	m_pEffect->SetNormalMap(pNormalTexture);
+}
+
+void Mesh::SetSpecularMap(dae::Texture* pSpecularTexture) const
+{
+	m_pEffect->SetSpecularMap(pSpecularTexture);
+}
+
+void Mesh::SetGlossinessMap(dae::Texture* pGLossinessTexture) const
+{
+	m_pEffect->SetGlossinessMap(pGLossinessTexture);
+}
+
 void Mesh::IncrementTechniqueId()
 {
 	m_CurrentTechniqueId = (m_CurrentTechniqueId + 1) % m_pEffect->GetTechniqueCount();
 	m_pTechnique = m_pEffect->GetTechnique(m_CurrentTechniqueId);
+}
+
+void Mesh::Rotate(float angle)
+{
+	m_pWorldMatrix = m_pWorldMatrix.CreateRotationY(angle);
 }
 
 

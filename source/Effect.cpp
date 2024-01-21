@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "Effect.h"
+//#include <sstream>
 
 Effect::Effect(ID3D11Device* pDevice, const std::wstring& assetFile)
 {
@@ -27,6 +28,36 @@ Effect::Effect(ID3D11Device* pDevice, const std::wstring& assetFile)
 	{
 		std::wcout << L"m_pDiffuseMapVariable not valid!\n";
 	}
+
+	m_pNormalMapVariable = m_pEffect->GetVariableByName("gNormalMap")->AsShaderResource();
+	if (!m_pNormalMapVariable->IsValid())
+	{
+		std::wcout << L"m_pNormalMapVariable not valid!\n";
+	}
+
+	m_pSpecularMapVariable = m_pEffect->GetVariableByName("gSpecularMap")->AsShaderResource();
+	if (!m_pSpecularMapVariable->IsValid())
+	{
+		std::wcout << L"m_pSpecularMapVariable not valid!\n";
+	}
+
+	m_pGlossinessMapVariable = m_pEffect->GetVariableByName("gGlossinessMap")->AsShaderResource();
+	if (!m_pGlossinessMapVariable->IsValid())
+	{
+		std::wcout << L"m_pGlossinessMapVariable not valid!\n";
+	}
+
+	m_pWorldMatrixVariable = m_pEffect->GetVariableByName("gWorldMatrix")->AsMatrix();
+	if (!m_pWorldMatrixVariable->IsValid())
+	{
+		std::wcout << L"m_pWorldMatrixVariable not valid!\n";
+	}
+
+	m_pCameraPosVariable = m_pEffect->GetVariableByName("gCameraPos")->AsVector();
+	if (!m_pCameraPosVariable->IsValid())
+	{
+		std::wcout << L"m_pCameraPosVariable not valid!\n";
+	}
 }
 
 Effect::~Effect()
@@ -43,6 +74,23 @@ Effect::~Effect()
 	{
 		m_pDiffuseMapVariable->Release();
 	}
+	if(m_pNormalMapVariable)
+	{
+		m_pNormalMapVariable->Release();
+	}
+	if (m_pSpecularMapVariable)
+	{
+		m_pSpecularMapVariable->Release();
+	}
+	if(m_pGlossinessMapVariable)
+	{
+		m_pGlossinessMapVariable->Release();
+	}
+	if(m_pWorldMatrixVariable)
+	{
+		m_pWorldMatrixVariable->Release();
+	}
+
 	for (auto& technique : m_pTechnique)
 	{
 		if (technique)
@@ -117,10 +165,14 @@ ID3DX11EffectTechnique* Effect::GetTechnique(int currentTechniqueId)
 	return m_pTechnique[currentTechniqueId];
 }
 
-void Effect::SetMatrix(const dae::Matrix& viewProjectionMatrix, const dae::Matrix& worldMatrix)
+void Effect::SetMatrix(const dae::Camera& camera, const dae::Matrix& worldMatrix)
 {
-	const auto tempMatrix = viewProjectionMatrix * worldMatrix;
+	
+	const auto tempMatrix = camera.GetViewMatrix() * camera.GetProjectionMatrix() * worldMatrix;
+	const auto tempPos = camera.GetPosition();
 	m_pMatWorldViewProjVariable->SetMatrix(reinterpret_cast<const float*>(&(tempMatrix)));
+	m_pWorldMatrixVariable->SetMatrix(reinterpret_cast<const float*>(&(worldMatrix)));
+	m_pCameraPosVariable->SetFloatVector(reinterpret_cast<const float*>(&(tempPos)));
 }
 
 void Effect::SetDiffuseMap(dae::Texture* pDiffuseTexture)
@@ -128,6 +180,30 @@ void Effect::SetDiffuseMap(dae::Texture* pDiffuseTexture)
 	if(m_pDiffuseMapVariable)
 	{
 		m_pDiffuseMapVariable->SetResource(pDiffuseTexture->GetSRV());
+	}
+}
+
+void Effect::SetNormalMap(dae::Texture* pNormalTexture) const
+{
+	if (m_pNormalMapVariable)
+	{
+		m_pNormalMapVariable->SetResource(pNormalTexture->GetSRV());
+	}
+}
+
+void Effect::SetSpecularMap(dae::Texture* pSpecularTexture) const
+{
+	if (m_pSpecularMapVariable)
+	{
+		m_pSpecularMapVariable->SetResource(pSpecularTexture->GetSRV());
+	}
+}
+
+void Effect::SetGlossinessMap(dae::Texture* pGLossinessTexture) const
+{
+	if (m_pGlossinessMapVariable)
+	{
+		m_pGlossinessMapVariable->SetResource(pGLossinessTexture->GetSRV());
 	}
 }
 

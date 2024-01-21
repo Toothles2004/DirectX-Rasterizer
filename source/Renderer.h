@@ -41,7 +41,10 @@ namespace dae
 		ID3D11DepthStencilView* m_pDepthStencilView{};
 		ID3D11Resource* m_pRenderTargetBuffer{};
 		ID3D11RenderTargetView* m_pRenderTargetView{};
-		Texture* m_pTexture{};
+		Texture* m_pDiffuseTexture{};
+		Texture* m_pNormalTexture{};
+		Texture* m_pSpecularTexture{};
+		Texture* m_pGlossinessTexture{};
 
 		std::unique_ptr<Camera> m_pCamera;
 		std::unique_ptr<Mesh> m_Mesh;

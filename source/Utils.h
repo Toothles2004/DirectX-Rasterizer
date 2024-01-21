@@ -3,6 +3,7 @@
 #include "Math.h"
 #include "Mesh.h"
 #include <vector>
+//#define DISABLE_OBJ
 
 namespace dae
 {
@@ -11,14 +12,22 @@ namespace dae
 		//Just parses vertices and indices
 #pragma warning(push)
 #pragma warning(disable : 4505) //Warning unreferenced local function
-		static bool ParseOBJ(const std::string& filename, std::vector<Vertex_PosCol>& vertices, std::vector<uint32_t>& indices, bool flipAxisAndWinding = false)
+		static bool ParseOBJ(const std::string& filename, std::vector<Vertex_PosCol>& vertices, std::vector<uint32_t>& indices, bool flipAxisAndWinding = true)
 		{
+#ifdef DISABLE_OBJ
+
+			//TODO: Enable the code below after uncommenting all the vertex attributes of DataTypes::Vertex
+			// >> Comment/Remove '#define DISABLE_OBJ'
+			assert(false && "OBJ PARSER not enabled! Check the comments in Utils::ParseOBJ");
+
+#else
+
 			std::ifstream file(filename);
 			if (!file)
 				return false;
 
 			std::vector<Vector3> positions{};
-			//std::vector<Vector3> normals{};
+			std::vector<Vector3> normals{};
 			std::vector<Vector2> UVs{};
 
 			vertices.clear();
@@ -56,7 +65,7 @@ namespace dae
 					float x, y, z;
 					file >> x >> y >> z;
 
-					//normals.emplace_back(x, y, z);
+					normals.emplace_back(x, y, z);
 				}
 				else if (sCommand == "f")
 				{
@@ -93,7 +102,7 @@ namespace dae
 
 								// Optional vertex normal
 								file >> iNormal;
-								//vertex.normal = normals[iNormal - 1];
+								vertex.normal = normals[iNormal - 1];
 							}
 						}
 
@@ -139,26 +148,27 @@ namespace dae
 				float r = 1.f / Vector2::Cross(diffX, diffY);
 
 				Vector3 tangent = (edge0 * diffY.y - edge1 * diffY.x) * r;
-				//vertices[index0].tangent += tangent;
-				//vertices[index1].tangent += tangent;
-				//vertices[index2].tangent += tangent;
+				vertices[index0].tangent += tangent;
+				vertices[index1].tangent += tangent;
+				vertices[index2].tangent += tangent;
 			}
 
-			//Create the Tangents (reject)
-			/*for (auto& v : vertices)
+			//Fix the tangents per vertex now because we accumulated
+			for (auto& v : vertices)
 			{
 				v.tangent = Vector3::Reject(v.tangent, v.normal).Normalized();
 
-				if(flipAxisAndWinding)
+				if (flipAxisAndWinding)
 				{
 					v.position.z *= -1.f;
 					v.normal.z *= -1.f;
 					v.tangent.z *= -1.f;
 				}
 
-			}*/
+			}
 
 			return true;
+#endif
 		}
 #pragma warning(pop)
 	}

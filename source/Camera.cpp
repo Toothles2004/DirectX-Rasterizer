@@ -9,7 +9,7 @@ dae::Camera::Camera(float _aspectRatio, float _fovAngle, const Vector3& _origin)
 	m_TotalYaw{},
 	m_AspectRatio{ _aspectRatio },
 	m_NearPlane{ 0.1f },
-	m_FarPlane{ 100.f },
+	m_FarPlane{ 1000.f },
 	m_MoveSpeed{ 25.f },
 	m_RotSpeed{ 150.f * TO_RADIANS }
 {
@@ -25,7 +25,7 @@ void dae::Camera::CalculateViewMatrix()
 	//ViewMatrix => Matrix::CreateLookAtLH(...) [not implemented yet]
 	//DirectX Implementation => https://learn.microsoft.com/en-us/windows/win32/direct3d9/d3dxmatrixlookatlh
 	m_ViewMatrix = Matrix::CreateLookAtLH(m_Origin, m_Forward, m_Up);
-	//m_InvViewMatrix = Matrix::Inverse(m_ViewMatrix);
+	m_InvViewMatrix = Matrix::Inverse(m_ViewMatrix);
 }
 
 void dae::Camera::CalculateProjectionMatrix()

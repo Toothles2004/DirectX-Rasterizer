@@ -27,11 +27,33 @@ namespace dae {
 		{
 			std::cout << "DirectX initialization failed!\n";
 		}
-		m_pCamera = std::make_unique<Camera>((static_cast<float>(m_Width) / m_Height), 45.f, Vector3{0.f, 0.f, -10.f});
-		m_pTexture = Texture::LoadFromFile("Resources/vehicle_diffuse.png", m_pDevice);
+		m_pCamera = std::make_unique<Camera>((static_cast<float>(m_Width) / m_Height), 45.f, Vector3{0.f, 0.f, -30.f});
+		m_pDiffuseTexture = Texture::LoadFromFile("Resources/vehicle_diffuse.png", m_pDevice);
+		m_pNormalTexture = Texture::LoadFromFile("Resources/vehicle_normal.png", m_pDevice);
+		m_pSpecularTexture = Texture::LoadFromFile("Resources/vehicle_specular.png", m_pDevice);
+		m_pGlossinessTexture = Texture::LoadFromFile("Resources/vehicle_gloss.png", m_pDevice);
 
-		m_Mesh = std::make_unique<Mesh>(m_pDevice, "Resources/vehicle.obj");
-		m_Mesh->SetDiffuseMap(m_pTexture);
+		const std::vector<Vertex_PosCol> vertices{
+			{ { -4.f, 4.f, 2.f }, { 0.f, 0.f } },
+			{ { 4.f, 4.f, 2.f }, { 1.f, 0.f } },
+			{ { -4.f, -4.f, 2.f }, { 0.f, 1.f } },
+			{ { 4.f, -4.f, 2.f }, { 1.f, 1.f } },
+		};
+		const std::vector<uint32_t> indices{
+			0, 3, 2,
+			0, 1, 3,
+		};
+
+		m_Mesh = std::make_unique<Mesh>(
+			m_pDevice,
+			"Resources/uv_grid_2.png",
+			vertices, indices);
+
+		/*m_Mesh = std::make_unique<Mesh>(m_pDevice, "Resources/cube.obj");
+		m_Mesh->SetDiffuseMap(m_pDiffuseTexture);
+		m_Mesh->SetNormalMap(m_pNormalTexture);
+		m_Mesh->SetSpecularMap(m_pSpecularTexture);
+		m_Mesh->SetGlossinessMap(m_pGlossinessTexture);*/
 	}
 
 	Renderer::~Renderer()
@@ -67,12 +89,13 @@ namespace dae {
 			m_pDeviceContext->Flush();
 			m_pDeviceContext->Release();
 		}
-		delete m_pTexture;
+		delete m_pDiffuseTexture;
 	}
 
 	void Renderer::Update(const Timer* pTimer)
 	{
 		m_pCamera->Update(pTimer);
+		m_Mesh->Rotate(pTimer->GetElapsed());
 	}
 
 	void Renderer::Render() const
@@ -86,7 +109,7 @@ namespace dae {
 		m_pDeviceContext->ClearDepthStencilView(m_pDepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.f, 0);
 
 		//2. Set Pipeline + Invoke Draw Calls (= Render)
-		m_Mesh->SetMatrix(m_pCamera->GetViewMatrix() * m_pCamera->GetProjectionMatrix());
+		m_Mesh->SetMatrix(*m_pCamera);
 		m_Mesh->Render(m_pDeviceContext);
 
 		//3. present backBuffer (SWAP)
